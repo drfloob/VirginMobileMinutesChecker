@@ -16,11 +16,13 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 import android.util.Log;
+import me.mobilematch.HttpRequest;
 
 public class WebsiteScraper {
 	
     public static String fetchScreen(String username, String password) {
-	String html= WebsiteScraper.getHTML(username, password);
+	//String html= WebsiteScraper.getHTML(username, password);
+	String html= getHTML_new(username, password);
 	String line= WebsiteScraper.getLine(html);
 	return line;
    }
@@ -152,23 +154,19 @@ public class WebsiteScraper {
 		    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 			return null;
 		    }
-		    public void checkClientTrusted(
-						   java.security.cert.X509Certificate[] certs, String authType) {
-		    }
-		    public void checkServerTrusted(
-						   java.security.cert.X509Certificate[] certs, String authType) {
-		    }
+		    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+		    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
 		}
 	    };
 			 
-	    String url = "https://www1.virginmobileusa.com/login/login.do";    
+	    String url = Globals.URL;    
 	    //String url = "https://www.triniluidades.qwerty/";    
 	   	   
 
 		    
 	    try {
 		SSLContext sc = SSLContext.getInstance("TLS");
-		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		sc.init(null, trustAllCerts, null);
 		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	    } catch (Exception e) {
 		e.getMessage();
@@ -225,6 +223,10 @@ public class WebsiteScraper {
 	return line;
      }
 
+
+    private static String getHTML_new(String username, String password) {
+	return (new HttpRequest()).sendPost(Globals.URL, "loginRoutingInfo=&min=" + username + "&vkey=" + password + "&submit=submit");
+    }
 
 
     private static String getLine(String html) {
