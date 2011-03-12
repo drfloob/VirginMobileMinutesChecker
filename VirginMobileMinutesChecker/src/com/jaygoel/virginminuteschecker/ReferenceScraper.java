@@ -4,6 +4,8 @@ public class ReferenceScraper implements IVMCScraper {
 
     /* usage note: don't call any other method if the page data is invalid */
     public boolean isValid(String str) {
+	if (str == null)
+	    return false;
 	if (str.indexOf("<p class=\"tel\">") < 0)
 	    return false;
 	return true;

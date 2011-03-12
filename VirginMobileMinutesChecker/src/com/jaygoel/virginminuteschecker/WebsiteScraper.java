@@ -16,13 +16,12 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 import android.util.Log;
-import me.mobilematch.HttpRequest;
 
 public class WebsiteScraper {
 	
     public static String fetchScreen(String username, String password) {
 	//String html= WebsiteScraper.getHTML(username, password);
-	String html= getHTML_new(username, password);
+	String html= getHTML(username, password);
 	String line= WebsiteScraper.getLine(html);
 	return line;
    }
@@ -222,11 +221,6 @@ public class WebsiteScraper {
 	//System.err.println(line);
 	return line;
      }
-
-
-    private static String getHTML_new(String username, String password) {
-	return (new HttpRequest()).sendPost(Globals.URL, "loginRoutingInfo=&min=" + username + "&vkey=" + password + "&submit=submit");
-    }
 
 
     private static String getLine(String html) {
