@@ -12,10 +12,11 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 
 import android.util.Log;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class WebsiteScraper {
 	
@@ -168,7 +169,9 @@ public class WebsiteScraper {
 		sc.init(null, trustAllCerts, null);
 		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	    } catch (Exception e) {
-		e.getMessage();
+		//System.out.println(e.getMessage());
+		e.printStackTrace();
+		return null;
 	    }
 	    	    
 	    //HttpsURLConnection.setFollowRedirects(true);
@@ -180,9 +183,17 @@ public class WebsiteScraper {
 	    	    
 	    	    
 	    connection.setDoOutput(true);
-	    	    
-	    OutputStreamWriter out = new OutputStreamWriter(
-							    connection.getOutputStream());
+
+	    OutputStream co;
+	    try {
+		co= connection.getOutputStream();
+	    } catch(IOException e) {
+		// @todo ui alert, maybe retry a set number of times
+		e.printStackTrace();
+		return null;
+	    }
+	    
+	    OutputStreamWriter out = new OutputStreamWriter(co);
 
 	    out.write("loginRoutingInfo=&min=" + username + "&vkey=" + password + "&submit=submit");
 	    out.close();
