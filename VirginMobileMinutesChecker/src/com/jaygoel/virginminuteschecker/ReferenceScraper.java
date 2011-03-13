@@ -1,13 +1,17 @@
 package com.jaygoel.virginminuteschecker;
 
+import android.util.*;
+import com.jaygoel.virginminuteschecker.Globals;
+
 public class ReferenceScraper implements IVMCScraper {
 
     /* usage note: don't call any other method if the page data is invalid */
     public boolean isValid(String str) {
-	if (str == null)
+	if (str == null || str.indexOf("<p class=\"tel\">") < 0) {
+	    Log.d(Globals.NAME, "invalid scrape results:");
+	    Log.d(Globals.NAME, str);
 	    return false;
-	if (str.indexOf("<p class=\"tel\">") < 0)
-	    return false;
+	}
 	return true;
     }
     

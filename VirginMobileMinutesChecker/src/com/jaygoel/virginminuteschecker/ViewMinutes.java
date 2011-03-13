@@ -207,6 +207,7 @@ public class ViewMinutes extends Activity implements Runnable {
 			    
 				//tv.setText(rc.get("info"));
 			} else {
+			    Log.e(Globals.NAME, "scrape returned invalid results");
 			    showErrorMessageAndRequery();
 			}
 		}

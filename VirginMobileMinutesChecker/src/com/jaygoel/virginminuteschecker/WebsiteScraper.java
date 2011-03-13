@@ -3,6 +3,7 @@ package com.jaygoel.virginminuteschecker;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.HashMap;
@@ -21,7 +22,6 @@ import java.io.OutputStream;
 public class WebsiteScraper {
 	
     public static String fetchScreen(String username, String password) {
-	//String html= WebsiteScraper.getHTML(username, password);
 	String html= getHTML(username, password);
 	String line= WebsiteScraper.getLine(html);
 	return line;
@@ -32,6 +32,7 @@ public class WebsiteScraper {
 	Map<String, String> rc = new HashMap<String, String>();
 		   
 	if (line == null) {
+	    Log.d(Globals.NAME, "WebsiteScraper.parseInfo: scraped string is null");
 	    rc.put("isValid", "FALSE");
 	    return rc;
 	}
@@ -47,6 +48,8 @@ public class WebsiteScraper {
    	    
 	if (start < 0) {
 	    rc.put("isValid", "FALSE");
+	    Log.d(Globals.NAME, "WebsiteScraper.parseInfo: scraped string is invalid:");
+	    //Log.d(Globals.NAME, line);
 	    return rc;
 	} else {
 	    rc.put("isValid", "TRUE");
@@ -170,6 +173,7 @@ public class WebsiteScraper {
 		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 	    } catch (Exception e) {
 		//System.out.println(e.getMessage());
+		Log.e(Globals.NAME, "error from SSLContext (or cohorts)");
 		e.printStackTrace();
 		return null;
 	    }
@@ -180,6 +184,7 @@ public class WebsiteScraper {
 	    ((HttpsURLConnection) connection).setHostnameVerifier(new AllowAllHostnameVerifier());
 	    	   
 	    //connection.setFollowRedirects(true);
+	    connection.setInstanceFollowRedirects(false);
 	    	    
 	    	    
 	    connection.setDoOutput(true);
@@ -189,6 +194,7 @@ public class WebsiteScraper {
 		co= connection.getOutputStream();
 	    } catch(IOException e) {
 		// @todo ui alert, maybe retry a set number of times
+		Log.e(Globals.NAME, "error from connection.getOutputStream");
 		e.printStackTrace();
 		return null;
 	    }
@@ -200,12 +206,23 @@ public class WebsiteScraper {
 	    	    
 	    //connection.connect();
 
-	    Log.d(Globals.NAME, "Getting content");
+	    // detect specifically if login failed
+	    if (connection.getResponseCode() != 200) {
+		Log.e(Globals.NAME, "bad response code: " + Integer.toString(connection.getResponseCode()));
+		return null;
+	    }
 
-	    InputStreamReader in = new InputStreamReader((InputStream) connection.getContent());
 
-	    Log.d(Globals.NAME, "Finished getting content");
+	    InputStreamReader in;
+	    try {
+		in = new InputStreamReader((InputStream) connection.getContent());
+	    } catch(IOException e) {
+		Log.e(Globals.NAME, "error from connection.getContent");
+		e.printStackTrace();
+		return null;
+	    }
 
+	    /*
 	    BufferedReader buff = new BufferedReader(in);
 	    line = buff.readLine();
 	    	    
@@ -215,6 +232,22 @@ public class WebsiteScraper {
 		}
 		line = buff.readLine();
 	    }
+	    */
+
+	    // reading entire page into `line`, as a test, and for debugging purposes.
+	    // @todo parsing speed tests on various devices
+
+	    final char[] buffer = new char[0x10000];
+	    StringBuilder builder = new StringBuilder();
+	    int read;
+	    do {
+		read = in.read(buffer, 0, buffer.length);
+		if (read>0) {
+		    builder.append(buffer, 0, read);
+		}
+	    } while (read>=0);
+	    line = builder.toString();
+
 
 	    connection.disconnect();
 	} catch (Exception e) {
@@ -225,11 +258,11 @@ public class WebsiteScraper {
 	    return line;
 	    //rc.put("isValid", "FALSE");
 	}
-	//line = null;
+
+
 	if (line == null) {
 	    line = "";
 	}
-	//System.err.println(line);
 	return line;
      }
 
